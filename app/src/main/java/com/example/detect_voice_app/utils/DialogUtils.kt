@@ -1,4 +1,4 @@
-package com.example.detect_voice_app.Utils
+package com.example.detect_voice_app.utils
 
 import android.app.Dialog
 import android.graphics.Color

@@ -2,7 +2,7 @@ package com.example.detect_voice_app.base
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.detect_voice_app.Utils.SingleLiveEvent
+import com.example.detect_voice_app.utils.SingleLiveEvent
 
 open class BaseViewModel : ViewModel() {
 
