@@ -2,4 +2,9 @@
     <string name="app_name">detect_voice_app</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_record_audio_permission">Allow Permission</string>
+    <string name="message_record_audio_permission">Allow record audio permission ?</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="start">Start</string>
 </resources>
