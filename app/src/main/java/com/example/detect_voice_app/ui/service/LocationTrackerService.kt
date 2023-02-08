@@ -28,6 +28,7 @@ LocationTrackerService : Service() {
     private val locationCallback = object :
         LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
+            Log.d("TAG", "onLocationResult: "+result.lastLocation?.accuracy)
             result.lastLocation?.apply {
                 Location.distanceBetween(
                     NotificationConstants.LATITUDE,
