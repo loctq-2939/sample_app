@@ -1,11 +1,14 @@
 package com.example.detect_voice_app.extensions
 
 import android.Manifest
+import android.app.Activity
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.ContentResolver
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.content.ContextCompat
 
@@ -42,5 +45,16 @@ fun Context.createChannel(channelId: String, channelName: String) {
         notificationChannel.setSound(null, null)
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.createNotificationChannel(notificationChannel)
+    }
+}
+
+fun Activity?.getRawUri(resId: Int): Uri? {
+    return this?.let {
+        val uri = Uri.Builder()
+            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            .authority(packageName)
+            .appendPath("$resId")
+            .build()
+        uri
     }
 }
