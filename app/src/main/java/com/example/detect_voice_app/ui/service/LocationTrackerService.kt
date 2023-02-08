@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.location.Location
-import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -17,7 +16,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import timber.log.Timber
 
-class LocationTrackerService : Service() {
+class
+LocationTrackerService : Service() {
 
     private var mLocationRequest: LocationRequest? = null
     private val notificationUtils: NotificationUtils by lazy { NotificationUtils(this) }
@@ -42,11 +42,7 @@ class LocationTrackerService : Service() {
             } else {
                 LocalBroadcastManager.getInstance(applicationContext)
                     .sendBroadcastSync(
-                        Intent(NotificationConstants.ACTION_NEAR_LOCATION).apply {
-                            val bundle = Bundle()
-                            bundle.putBoolean("status", true)
-                            putExtras(bundle)
-                        }
+                        Intent(NotificationConstants.ACTION_NEAR_LOCATION)
                     )
                 LocationServices.getFusedLocationProviderClient(this@LocationTrackerService)
                     .removeLocationUpdates(this)

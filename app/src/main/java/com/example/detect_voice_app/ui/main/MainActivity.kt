@@ -32,13 +32,6 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            this@MainActivity.stopService(
-                Intent(
-                    this@MainActivity,
-                    LocationTrackerService::class.java
-                )
-            )
-
             //initMediaPlayer(R.raw.hpbd)
             initMediaPlayer(url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3") {
                 startService(Intent(this@MainActivity, LocationTrackerService::class.java))
@@ -62,14 +55,13 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     override fun onDestroy() {
         super.onDestroy()
+        stopLocationTrackerService()
         releaseMedia()
-        this@MainActivity.stopService(
-            Intent(
-                this@MainActivity,
-                LocationTrackerService::class.java
-            )
-        )
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+    }
+
+    private fun stopLocationTrackerService(){
+        stopService(Intent(this, LocationTrackerService::class.java))
     }
 
     private fun initMediaPlayer(@RawRes soundRawId: Int, completed: () -> Unit = {}) {
@@ -130,17 +122,17 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
     }
 
     private fun muteSound() {
-        val amanager = getSystemService(AUDIO_SERVICE) as AudioManager
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            amanager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION,AudioManager.ADJUST_MUTE, 0)
-            amanager.adjustStreamVolume(AudioManager.STREAM_ALARM,AudioManager.ADJUST_MUTE, 0)
-            amanager.adjustStreamVolume(AudioManager.STREAM_RING,AudioManager.ADJUST_MUTE, 0)
-            amanager.adjustStreamVolume(AudioManager.STREAM_SYSTEM,AudioManager.ADJUST_MUTE, 0)
+            audioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION,AudioManager.ADJUST_MUTE, 0)
+            audioManager.adjustStreamVolume(AudioManager.STREAM_ALARM,AudioManager.ADJUST_MUTE, 0)
+            audioManager.adjustStreamVolume(AudioManager.STREAM_RING,AudioManager.ADJUST_MUTE, 0)
+            audioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM,AudioManager.ADJUST_MUTE, 0)
         } else {
-            amanager.setStreamMute(AudioManager.STREAM_NOTIFICATION, true)
-            amanager.setStreamMute(AudioManager.STREAM_ALARM, true)
-            amanager.setStreamMute(AudioManager.STREAM_RING, true)
-            amanager.setStreamMute(AudioManager.STREAM_SYSTEM, true)
+            audioManager.setStreamMute(AudioManager.STREAM_NOTIFICATION, true)
+            audioManager.setStreamMute(AudioManager.STREAM_ALARM, true)
+            audioManager.setStreamMute(AudioManager.STREAM_RING, true)
+            audioManager.setStreamMute(AudioManager.STREAM_SYSTEM, true)
         }
     }
 }

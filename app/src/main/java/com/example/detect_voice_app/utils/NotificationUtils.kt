@@ -3,8 +3,6 @@ package com.example.detect_voice_app.utils
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.app.Service
 import android.content.Intent
-import android.content.pm.ServiceInfo
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -65,7 +63,9 @@ class NotificationUtils(private val service: Service) {
                     service,
                     NotificationConstants.NOTIFICATION_REQUEST_ID,
                     Intent(service, MainActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        action = Intent.ACTION_MAIN
+                        addCategory(Intent.CATEGORY_LAUNCHER)
                     },
                     FLAG_UPDATE_CURRENT
                 )
