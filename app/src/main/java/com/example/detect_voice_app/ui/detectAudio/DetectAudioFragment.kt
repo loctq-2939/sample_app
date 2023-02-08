@@ -30,6 +30,7 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
 
     var formattedSpeech: StringBuffer = StringBuffer()
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
@@ -66,6 +67,8 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
                         viewBinding.tvSpeechText.text = formattedSpeech.toString()
                     }
                 }
+                recognizer.cancel()
+                recognizer.startListening(intent)
             }
 
             override fun onReadyForSpeech(params: Bundle) {
@@ -87,6 +90,8 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
              */
             override fun onError(error: Int) {
                 System.err.println("Error listening for speech: $error")
+                recognizer.cancel()
+                recognizer.startListening(intent)
             }
 
             override fun onBeginningOfSpeech() {

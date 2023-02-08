@@ -78,16 +78,7 @@ class NotificationUtils(private val service: Service) {
             notificationBuilder = createNotification()
         }
         updateNotification()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            notificationBuilder?.build()?.let {
-                service.startForeground(
-                    NOTIFICATION_ID, it,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                )
-            }
-        } else {
-            service.startForeground(NOTIFICATION_ID, notificationBuilder?.build())
-        }
+        service.startForeground(NOTIFICATION_ID, notificationBuilder?.build())
     }
 
     private fun updateNotification() {
