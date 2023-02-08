@@ -22,6 +22,38 @@ class LocationTrackerService : Service() {
     private var mLocationRequest: LocationRequest? = null
     private val notificationUtils: NotificationUtils by lazy { NotificationUtils(this) }
 
+    private val resultsDis = FloatArray(1)
+    private val radius = 0.03 * 1000 // 30m
+
+    private val locationCallback = object :
+        LocationCallback() {
+        override fun onLocationResult(result: LocationResult) {
+            result.lastLocation?.apply {
+                Location.distanceBetween(
+                    NotificationConstants.LATITUDE,
+                    NotificationConstants.LONGITUDE,
+                    latitude,
+                    longitude,
+                    resultsDis
+                )
+            }
+            if (resultsDis[0] > radius) {
+                Log.d("TAG", "onLocationResult: You are not in area")
+            } else {
+                LocalBroadcastManager.getInstance(applicationContext)
+                    .sendBroadcastSync(
+                        Intent(NotificationConstants.ACTION_NEAR_LOCATION).apply {
+                            val bundle = Bundle()
+                            bundle.putBoolean("status", true)
+                            putExtras(bundle)
+                        }
+                    )
+                LocationServices.getFusedLocationProviderClient(this@LocationTrackerService)
+                    .removeLocationUpdates(this)
+            }
+        }
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -43,46 +75,19 @@ class LocationTrackerService : Service() {
     }
 
     private fun createLocationRequest() {
-        mLocationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
+        mLocationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000)
             .setWaitForAccurateLocation(false)
             .setMinUpdateIntervalMillis(500)
-            .setMaxUpdateDelayMillis(1000)
+            .setMaxUpdateDelayMillis(5000)
             .build()
     }
 
     @SuppressLint("MissingPermission")
     private fun startLocationUpdates() {
         try {
-            val resultsDis = FloatArray(1)
-            val radius = 0.03 * 1000 // 0.5km
             mLocationRequest?.let {
                 LocationServices.getFusedLocationProviderClient(this)
-                    .requestLocationUpdates(it, object :
-                        LocationCallback() {
-                        override fun onLocationResult(result: LocationResult) {
-                            result.lastLocation?.apply {
-                                Location.distanceBetween(
-                                    NotificationConstants.LATITUDE,
-                                    NotificationConstants.LONGITUDE,
-                                    latitude,
-                                    longitude,
-                                    resultsDis
-                                )
-                            }
-                            if (resultsDis[0] > radius) {
-                                Log.d("TAG", "onLocationResult: You are not in area")
-                            } else {
-                                LocalBroadcastManager.getInstance(applicationContext)
-                                    .sendBroadcastSync(
-                                        Intent(NotificationConstants.ACTION_NEAR_LOCATION).apply {
-                                            val bundle = Bundle()
-                                            bundle.putBoolean("status", true)
-                                            putExtras(bundle)
-                                        }
-                                    )
-                            }
-                        }
-                    }, null)
+                    .requestLocationUpdates(it, locationCallback, null)
             }
         } catch (e: Exception) {
             Timber.e(e)
