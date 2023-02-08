@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -19,6 +21,7 @@ import com.example.detect_voice_app.ui.detectAudio.DetectAudioFragment
 import com.example.detect_voice_app.ui.service.LocationTrackerService
 import com.example.detect_voice_app.utils.NotificationConstants.ACTION_NEAR_LOCATION
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
@@ -51,6 +54,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        muteSound()
         replaceFragment(DetectAudioFragment(), R.id.container, addToBackStack = false)
         LocalBroadcastManager.getInstance(applicationContext)
             .registerReceiver(broadcastReceiver, intentFilter)
@@ -58,6 +62,13 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     override fun onDestroy() {
         super.onDestroy()
+        releaseMedia()
+        this@MainActivity.stopService(
+            Intent(
+                this@MainActivity,
+                LocationTrackerService::class.java
+            )
+        )
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
     }
 
@@ -116,5 +127,20 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
     private fun releaseMedia() {
         mediaPlayer?.release()
         mediaPlayer = null
+    }
+
+    private fun muteSound() {
+        val amanager = getSystemService(AUDIO_SERVICE) as AudioManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            amanager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION,AudioManager.ADJUST_MUTE, 0)
+            amanager.adjustStreamVolume(AudioManager.STREAM_ALARM,AudioManager.ADJUST_MUTE, 0)
+            amanager.adjustStreamVolume(AudioManager.STREAM_RING,AudioManager.ADJUST_MUTE, 0)
+            amanager.adjustStreamVolume(AudioManager.STREAM_SYSTEM,AudioManager.ADJUST_MUTE, 0)
+        } else {
+            amanager.setStreamMute(AudioManager.STREAM_NOTIFICATION, true)
+            amanager.setStreamMute(AudioManager.STREAM_ALARM, true)
+            amanager.setStreamMute(AudioManager.STREAM_RING, true)
+            amanager.setStreamMute(AudioManager.STREAM_SYSTEM, true)
+        }
     }
 }
