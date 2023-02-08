@@ -41,6 +41,9 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
     private fun setupView() {
         with(viewBinding) {
             btnStart.setOnClickListener {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    checkPushNotificationWithPermissionCheck()
+                }
                 startListerWithPermissionCheck()
             }
         }
@@ -164,6 +167,12 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
             )
         )
     }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @NeedsPermission(
+        Manifest.permission.POST_NOTIFICATIONS
+    )
+    fun checkPushNotification() {}
 
     @OnShowRationale(Manifest.permission.RECORD_AUDIO)
     fun showRationaleForCamera(request: PermissionRequest) {
