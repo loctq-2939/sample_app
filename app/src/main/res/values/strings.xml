@@ -7,4 +7,11 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="start">Start</string>
+    <string name="notification_channel_id">1999</string>
+    <string name="notification_title">title</string>
+    <string name="notification_channel_name">chanel_name</string>
+    <string name="location_tracker">Location Tracker</string>
+    <string name="content_text">Content Text</string>
+    <string name="sticker">Sticker</string>
+    <string name="service_is_running">Service is running in background</string>
 </resources>

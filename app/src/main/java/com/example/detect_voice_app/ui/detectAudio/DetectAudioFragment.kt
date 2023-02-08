@@ -10,9 +10,10 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import com.example.detect_voice_app.BuildConfig
 import com.example.detect_voice_app.R
-import com.example.detect_voice_app.Utils.showDialog
 import com.example.detect_voice_app.base.BaseFragment
 import com.example.detect_voice_app.databinding.FragmentDetectAudioBinding
+import com.example.detect_voice_app.ui.service.LocationTrackerService
+import com.example.detect_voice_app.utils.showDialog
 import dagger.hilt.android.AndroidEntryPoint
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnNeverAskAgain
@@ -124,9 +125,14 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
         onRequestPermissionsResult(requestCode, grantResults)
     }
 
-    @NeedsPermission(Manifest.permission.RECORD_AUDIO)
+    @NeedsPermission(
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+    )
     fun startLister() {
         startListening()
+        requireActivity().startService(Intent(requireContext(), LocationTrackerService::class.java))
     }
 
     @OnShowRationale(Manifest.permission.RECORD_AUDIO)
