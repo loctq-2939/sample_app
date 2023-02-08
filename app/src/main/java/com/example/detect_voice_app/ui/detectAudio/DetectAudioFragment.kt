@@ -2,11 +2,13 @@ package com.example.detect_voice_app.ui.detectAudio
 
 import android.Manifest
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.viewModels
 import com.example.detect_voice_app.BuildConfig
 import com.example.detect_voice_app.R
@@ -136,8 +138,31 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
         Manifest.permission.ACCESS_FINE_LOCATION,
     )
     fun startLister() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startBackgroundLocationWithPermissionCheck()
+        } else {
+            startListening()
+            requireActivity().startService(
+                Intent(
+                    requireContext(),
+                    LocationTrackerService::class.java
+                )
+            )
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    @NeedsPermission(
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+    )
+    fun startBackgroundLocation() {
         startListening()
-        requireActivity().startService(Intent(requireContext(), LocationTrackerService::class.java))
+        requireActivity().startService(
+            Intent(
+                requireContext(),
+                LocationTrackerService::class.java
+            )
+        )
     }
 
     @OnShowRationale(Manifest.permission.RECORD_AUDIO)

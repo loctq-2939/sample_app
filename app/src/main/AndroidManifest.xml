@@ -36,6 +36,7 @@
         <service
             android:name=".ui.service.LocationTrackerService"
             android:exported="false"
+            android:foregroundServiceType="location"
             android:permission="android.permission.ACCESS_BACKGROUND_LOCATION" />
     </application>
 
