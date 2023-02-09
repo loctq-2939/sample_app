@@ -9,12 +9,16 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.view.View
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.detect_voice_app.BuildConfig
 import com.example.detect_voice_app.R
 import com.example.detect_voice_app.base.BaseFragment
 import com.example.detect_voice_app.databinding.FragmentDetectAudioBinding
+import com.example.detect_voice_app.ui.main.MainViewModel
 import com.example.detect_voice_app.ui.service.LocationTrackerService
+import com.example.detect_voice_app.utils.NotificationConstants
 import com.example.detect_voice_app.utils.showDialog
 import dagger.hilt.android.AndroidEntryPoint
 import permissions.dispatcher.NeedsPermission
@@ -32,6 +36,11 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
 
     var formattedSpeech: StringBuffer = StringBuffer()
 
+    val recognizer: SpeechRecognizer by lazy {
+        SpeechRecognizer.createSpeechRecognizer(
+            requireContext()
+        )
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -43,8 +52,9 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
             btnStart.setOnClickListener {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     checkPushNotificationWithPermissionCheck()
+                } else {
+                    startListerWithPermissionCheck()
                 }
-                startListerWithPermissionCheck()
             }
         }
     }
@@ -59,8 +69,6 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
             RecognizerIntent.EXTRA_CALLING_PACKAGE,
             BuildConfig.APPLICATION_ID
         )
-        val recognizer = SpeechRecognizer
-            .createSpeechRecognizer(requireContext())
         val listener: RecognitionListener = object : RecognitionListener {
             override fun onResults(results: Bundle) {
                 val voiceResults = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
@@ -70,6 +78,13 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
                     for (match in voiceResults) {
                         formattedSpeech.append(String.format("\n- %s", match.toString()))
                         viewBinding.tvSpeechText.text = formattedSpeech.toString()
+                        if (match.lowercase() == STOP) {
+                            recognizer.cancel()
+                            LocalBroadcastManager.getInstance(requireContext())
+                                .sendBroadcast(
+                                    Intent(NotificationConstants.ACTION_STOP_MUSIC)
+                                )
+                        }
                     }
                 }
                 recognizer.cancel()
@@ -96,7 +111,9 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
             override fun onError(error: Int) {
                 System.err.println("Error listening for speech: $error")
                 recognizer.cancel()
-                recognizer.startListening(intent)
+                if (error == 7)
+                    recognizer.startListening(intent)
+
             }
 
             override fun onBeginningOfSpeech() {
@@ -123,8 +140,15 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
                 // TODO Auto-generated method stub
             }
         }
+        recognizer.cancel()
         recognizer.setRecognitionListener(listener)
         recognizer.startListening(intent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        recognizer.setRecognitionListener(null)
+        recognizer.cancel()
     }
 
     override fun onRequestPermissionsResult(
@@ -172,7 +196,9 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
     @NeedsPermission(
         Manifest.permission.POST_NOTIFICATIONS
     )
-    fun checkPushNotification() {}
+    fun checkPushNotification() {
+        startListerWithPermissionCheck()
+    }
 
     @OnShowRationale(Manifest.permission.RECORD_AUDIO)
     fun showRationaleForCamera(request: PermissionRequest) {
@@ -191,4 +217,7 @@ class DetectAudioFragment : BaseFragment<FragmentDetectAudioBinding, DetectAudio
     fun onCameraNeverAskAgain() {
     }
 
+    companion object {
+        const val STOP = "stop"
+    }
 }

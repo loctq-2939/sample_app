@@ -20,6 +20,8 @@ import com.example.detect_voice_app.extensions.getRawUri
 import com.example.detect_voice_app.ui.detectAudio.DetectAudioFragment
 import com.example.detect_voice_app.ui.service.LocationTrackerService
 import com.example.detect_voice_app.utils.NotificationConstants.ACTION_NEAR_LOCATION
+import com.example.detect_voice_app.utils.NotificationConstants.ACTION_STOP_MUSIC
+import com.example.detect_voice_app.utils.NotificationConstants.NOTIFICATION_ID
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -32,9 +34,17 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            //initMediaPlayer(R.raw.hpbd)
-            initMediaPlayer(url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3") {
-                startService(Intent(this@MainActivity, LocationTrackerService::class.java))
+            when (intent?.action) {
+                ACTION_NEAR_LOCATION -> {
+                    initMediaPlayer(url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3") {
+                        startService(Intent(this@MainActivity, LocationTrackerService::class.java))
+                    }
+                }
+                ACTION_STOP_MUSIC -> {
+                    initMediaPlayer(R.raw.hpbd) {
+                        startService(Intent(this@MainActivity, LocationTrackerService::class.java))
+                    }
+                }
             }
         }
     }
@@ -42,6 +52,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
     private val intentFilter: IntentFilter by lazy {
         IntentFilter().apply {
             addAction(ACTION_NEAR_LOCATION)
+            addAction(ACTION_STOP_MUSIC)
         }
     }
 
@@ -60,7 +71,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
     }
 
-    private fun stopLocationTrackerService(){
+    private fun stopLocationTrackerService() {
         stopService(Intent(this, LocationTrackerService::class.java))
     }
 
@@ -124,10 +135,14 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
     private fun muteSound() {
         val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            audioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION,AudioManager.ADJUST_MUTE, 0)
-            audioManager.adjustStreamVolume(AudioManager.STREAM_ALARM,AudioManager.ADJUST_MUTE, 0)
-            audioManager.adjustStreamVolume(AudioManager.STREAM_RING,AudioManager.ADJUST_MUTE, 0)
-            audioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM,AudioManager.ADJUST_MUTE, 0)
+            audioManager.adjustStreamVolume(
+                AudioManager.STREAM_NOTIFICATION,
+                AudioManager.ADJUST_MUTE,
+                0
+            )
+            audioManager.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_MUTE, 0)
+            audioManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_MUTE, 0)
+            audioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0)
         } else {
             audioManager.setStreamMute(AudioManager.STREAM_NOTIFICATION, true)
             audioManager.setStreamMute(AudioManager.STREAM_ALARM, true)
