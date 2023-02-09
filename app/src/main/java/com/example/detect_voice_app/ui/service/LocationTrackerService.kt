@@ -8,6 +8,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.detect_voice_app.utils.NotificationConstants
+import com.example.detect_voice_app.utils.NotificationConstants.RADIUS
 import com.example.detect_voice_app.utils.NotificationUtils
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -22,13 +23,11 @@ LocationTrackerService : Service() {
     private var mLocationRequest: LocationRequest? = null
     private val notificationUtils: NotificationUtils by lazy { NotificationUtils(this) }
 
-    private val resultsDis = FloatArray(1)
-    private val radius = 0.03 * 1000 // 30m
-
     private val locationCallback = object :
         LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
-            Log.d("TAG", "onLocationResult: "+result.lastLocation?.accuracy)
+            val resultsDis = FloatArray(1)
+            Log.d("TAG", "onLocationResult: " + result.lastLocation?.accuracy)
             result.lastLocation?.apply {
                 Location.distanceBetween(
                     NotificationConstants.LATITUDE,
@@ -38,11 +37,11 @@ LocationTrackerService : Service() {
                     resultsDis
                 )
             }
-            if (resultsDis[0] > radius) {
+            if (resultsDis[0] > RADIUS) {
                 Log.d("TAG", "onLocationResult: You are not in area")
             } else {
                 LocalBroadcastManager.getInstance(applicationContext)
-                    .sendBroadcastSync(
+                    .sendBroadcast(
                         Intent(NotificationConstants.ACTION_NEAR_LOCATION)
                     )
                 LocationServices.getFusedLocationProviderClient(this@LocationTrackerService)
