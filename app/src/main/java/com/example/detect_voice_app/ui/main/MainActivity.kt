@@ -21,7 +21,6 @@ import com.example.detect_voice_app.ui.detectAudio.DetectAudioFragment
 import com.example.detect_voice_app.ui.service.LocationTrackerService
 import com.example.detect_voice_app.utils.NotificationConstants.ACTION_NEAR_LOCATION
 import com.example.detect_voice_app.utils.NotificationConstants.ACTION_STOP_MUSIC
-import com.example.detect_voice_app.utils.NotificationConstants.NOTIFICATION_ID
 import dagger.hilt.android.AndroidEntryPoint
 
 

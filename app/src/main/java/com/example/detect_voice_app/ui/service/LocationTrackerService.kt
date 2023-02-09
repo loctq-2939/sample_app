@@ -5,7 +5,6 @@ import android.app.Service
 import android.content.Intent
 import android.location.Location
 import android.os.IBinder
-import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.detect_voice_app.utils.NotificationConstants
 import com.example.detect_voice_app.utils.NotificationConstants.RADIUS
@@ -36,11 +35,11 @@ LocationTrackerService : Service() {
                     resultsDis
                 )
             }
-            Log.d("TAG", "onLocationResult: " + resultsDis[0])
+            Timber.tag("TAG").d("onLocationResult: %s", resultsDis[0])
             if (resultsDis[0] > RADIUS) {
-                Log.d("TAG", "onLocationResult: You are not in area")
+                Timber.tag("TAG").d("onLocationResult: You are not in area")
             } else {
-                Log.d("TAG", "onLocationResult: You are in area")
+                Timber.tag("TAG").d("onLocationResult: You are in area")
                 LocalBroadcastManager.getInstance(applicationContext)
                     .sendBroadcast(
                         Intent(NotificationConstants.ACTION_NEAR_LOCATION)
