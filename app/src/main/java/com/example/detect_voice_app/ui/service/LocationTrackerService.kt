@@ -6,6 +6,7 @@ import android.content.Intent
 import android.location.Location
 import android.os.IBinder
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.example.detect_voice_app.data.repository.Repository
 import com.example.detect_voice_app.utils.NotificationConstants
 import com.example.detect_voice_app.utils.NotificationConstants.RADIUS
 import com.example.detect_voice_app.utils.NotificationUtils
@@ -14,13 +15,27 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class
-LocationTrackerService : Service() {
+@AndroidEntryPoint
+class LocationTrackerService : Service() {
+
+    @Inject
+    lateinit var repository: Repository
 
     private var mLocationRequest: LocationRequest? = null
     private val notificationUtils: NotificationUtils by lazy { NotificationUtils(this) }
+
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
 
     private val locationCallback = object :
         LocationCallback() {
@@ -40,12 +55,28 @@ LocationTrackerService : Service() {
                 Timber.tag("TAG").d("onLocationResult: You are not in area")
             } else {
                 Timber.tag("TAG").d("onLocationResult: You are in area")
-                LocalBroadcastManager.getInstance(applicationContext)
-                    .sendBroadcast(
-                        Intent(NotificationConstants.ACTION_NEAR_LOCATION)
-                    )
                 LocationServices.getFusedLocationProviderClient(this@LocationTrackerService)
                     .removeLocationUpdates(this)
+                scope.launch {
+                    //delay(3000)
+
+                    try {
+                        val mp3Link = repository.getVoice()
+                        if (mp3Link.isNullOrEmpty()) {
+                            startLocationUpdates()
+                        } else {
+                            Timber.tag("TAG").d("Mp3 = $mp3Link")
+                            LocalBroadcastManager.getInstance(applicationContext)
+                                .sendBroadcast(
+                                    Intent(NotificationConstants.ACTION_NEAR_LOCATION).apply {
+                                        putExtra("MP3", mp3Link)
+                                    }
+                                )
+                        }
+                    } catch (ex: Exception) {
+
+                    }
+                }
             }
         }
     }
@@ -88,5 +119,10 @@ LocationTrackerService : Service() {
         } catch (e: Exception) {
             Timber.e(e)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
     }
 }

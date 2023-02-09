@@ -35,9 +35,17 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 ACTION_NEAR_LOCATION -> {
-                    initMediaPlayer(url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3") {
-                        startService(Intent(this@MainActivity, LocationTrackerService::class.java))
+                    val mp3Link = intent.getStringExtra("MP3")
+                    if(!mp3Link.isNullOrEmpty()) {
+                        initMediaPlayer(url = mp3Link) {
+                            startService(Intent(this@MainActivity, LocationTrackerService::class.java))
+                        }
                     }
+                    else {
+                        Toast.makeText(this@MainActivity, "Not mp3", Toast.LENGTH_SHORT).show()
+                        //startService(Intent(this@MainActivity, LocationTrackerService::class.java))
+                    }
+
                 }
                 ACTION_STOP_MUSIC -> {
                     initMediaPlayer(R.raw.hpbd) {

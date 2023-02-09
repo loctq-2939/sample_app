@@ -36,9 +36,14 @@ class NetworkModule {
     ): Retrofit =
         Retrofit.Builder()
             .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .baseUrl("")
+            .baseUrl("https://deezerdevs-deezer.p.rapidapi.com/")
             .client(okHttpClient)
             .build()
+
+    @Singleton
+    @Provides
+    fun provideMoshi(): Moshi = Moshi.Builder()
+        .build()
 
     @Singleton
     @Provides
