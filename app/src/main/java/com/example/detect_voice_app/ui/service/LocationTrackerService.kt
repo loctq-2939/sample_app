@@ -27,7 +27,6 @@ LocationTrackerService : Service() {
         LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
             val resultsDis = FloatArray(1)
-            Log.d("TAG", "onLocationResult: " + result.lastLocation?.accuracy)
             result.lastLocation?.apply {
                 Location.distanceBetween(
                     NotificationConstants.LATITUDE,
@@ -37,9 +36,11 @@ LocationTrackerService : Service() {
                     resultsDis
                 )
             }
+            Log.d("TAG", "onLocationResult: " + resultsDis[0])
             if (resultsDis[0] > RADIUS) {
                 Log.d("TAG", "onLocationResult: You are not in area")
             } else {
+                Log.d("TAG", "onLocationResult: You are in area")
                 LocalBroadcastManager.getInstance(applicationContext)
                     .sendBroadcast(
                         Intent(NotificationConstants.ACTION_NEAR_LOCATION)
